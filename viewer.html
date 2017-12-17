@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>glsl-raytracer</title>
+<style>body{margin:0;background:#111}canvas{display:block;width:100vw;height:100vh}</style>
+<canvas id="c"></canvas>
+<script>
+var canvas = document.getElementById('c');
+var gl = canvas.getContext('webgl');
+var mouse = [0, 0, 0, 0];
+
+canvas.addEventListener('mousemove', function (e) {
+  if (e.buttons) mouse = [e.clientX, canvas.height - e.clientY, 1, 0];
+});
+
+function compile(type, src) {
+  var s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s);
+  return s;
+}
+
+fetch('shaders/scene.glsl').then(function (r) { return r.text(); }).then(function (frag) {
+  var vs = 'attribute vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }';
+  var fs = 'precision highp float;\nuniform vec3 iResolution;\nuniform float iTime;\nuniform vec4 iMouse;\n' +
+    frag + '\nvoid main() { mainImage(gl_FragColor, gl_FragCoord.xy); }';
+  var prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  var uRes = gl.getUniformLocation(prog, 'iResolution');
+  var uTime = gl.getUniformLocation(prog, 'iTime');
+  var uMouse = gl.getUniformLocation(prog, 'iMouse');
+
+  function frame(t) {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform3f(uRes, canvas.width, canvas.height, 1);
+    gl.uniform1f(uTime, t / 1000);
+    gl.uniform4fv(uMouse, mouse);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+});
+</script>

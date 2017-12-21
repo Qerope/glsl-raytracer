@@ -13,6 +13,14 @@ float map(vec3 p)
     return min(d, p.y);
 }
 
+vec3 calcNormal(vec3 p)
+{
+    vec2 e = vec2(EPS, 0.0);
+    return normalize(vec3(map(p + e.xyy) - map(p - e.xyy),
+                          map(p + e.yxy) - map(p - e.yxy),
+                          map(p + e.yyx) - map(p - e.yyx)));
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     vec2 uv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;

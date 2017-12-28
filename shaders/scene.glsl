@@ -21,18 +21,18 @@ vec3 calcNormal(vec3 p)
                           map(p + e.yyx) - map(p - e.yyx)));
 }
 
-float shadow(vec3 ro, vec3 rd)
+float softShadow(vec3 ro, vec3 rd, float k)
 {
+    float res = 1.0;
     float t = 0.02;
     for (int i = 0; i < 48; i++) {
         float h = map(ro + rd * t);
-        if (h < EPS)
-            return 0.0;
-        t += h;
-        if (t > 20.0)
+        res = min(res, k * h / t);
+        t += clamp(h, 0.02, 0.5);
+        if (res < 0.001 || t > 20.0)
             break;
     }
-    return 1.0;
+    return clamp(res, 0.0, 1.0);
 }
 
 vec3 shade(vec3 ro, vec3 rd)
@@ -46,7 +46,7 @@ vec3 shade(vec3 ro, vec3 rd)
     vec3 n = calcNormal(p);
     vec3 light = normalize(vec3(0.6, 0.8, -0.4));
     float diff = clamp(dot(n, light), 0.0, 1.0);
-    diff *= shadow(p + n * 0.01, light);
+    diff *= softShadow(p + n * 0.01, light, 12.0);
     vec3 albedo = vec3(0.8, 0.35, 0.25);
     vec3 col = albedo * (0.15 + 0.85 * diff);
     return col;

@@ -58,5 +58,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec3 ro = vec3(0.0, 1.5, -4.0);
     vec3 rd = normalize(vec3(uv, 1.5));
     vec3 col = shade(ro, rd);
+    col = pow(col, vec3(1.0 / 2.2));
     fragColor = vec4(col, 1.0);
 }

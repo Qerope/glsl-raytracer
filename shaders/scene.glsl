@@ -54,10 +54,16 @@ vec3 shade(vec3 ro, vec3 rd)
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
+    float a = iMouse.x / iResolution.x * 6.2831;
+    vec3 ro = vec3(5.0 * sin(a), 2.0, -5.0 * cos(a));
+    vec3 ta = vec3(0.0, 0.8, 0.0);
+    vec3 ww = normalize(ta - ro);
+    vec3 uu = normalize(cross(ww, vec3(0.0, 1.0, 0.0)));
+    vec3 vv = cross(uu, ww);
+    vec3 col = vec3(0.0);
     vec2 uv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
-    vec3 ro = vec3(0.0, 1.5, -4.0);
-    vec3 rd = normalize(vec3(uv, 1.5));
-    vec3 col = shade(ro, rd);
+    vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.5 * ww);
+    col = shade(ro, rd);
     col = pow(col, vec3(1.0 / 2.2));
     fragColor = vec4(col, 1.0);
 }

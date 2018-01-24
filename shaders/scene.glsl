@@ -7,10 +7,35 @@ float sdSphere(vec3 p, float r)
     return length(p) - r;
 }
 
+float sdBox(vec3 p, vec3 b)
+{
+    vec3 d = abs(p) - b;
+    return min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
+}
+
+float smin(float a, float b, float k)
+{
+    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+}
+
 float map(vec3 p)
 {
     float d = sdSphere(p - vec3(0.0, 1.0, 0.0), 1.0);
+    d = smin(d, sdBox(p - vec3(1.1, 0.5, 0.0), vec3(0.5)), 0.3);
     return min(d, p.y);
+}
+
+float march(vec3 ro, vec3 rd)
+{
+    float t = 0.0;
+    for (int i = 0; i < MAX_STEPS; i++) {
+        float d = map(ro + rd * t);
+        if (d < EPS || t > MAX_DIST)
+            break;
+        t += d;
+    }
+    return t;
 }
 
 vec3 calcNormal(vec3 p)

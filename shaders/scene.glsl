@@ -90,6 +90,18 @@ vec3 shade(vec3 ro, vec3 rd)
     return col;
 }
 
+vec3 shadeRefl(vec3 ro, vec3 rd)
+{
+    vec3 col = shade(ro, rd);
+    float t = march(ro, rd);
+    if (t < MAX_DIST) {
+        vec3 p = ro + rd * t;
+        vec3 n = calcNormal(p);
+        col = mix(col, shade(p, reflect(rd, n)), 0.25);
+    }
+    return col;
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     float a = iMouse.x / iResolution.x * 6.2831;
@@ -101,7 +113,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     vec3 col = vec3(0.0);
     vec2 uv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
     vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.5 * ww);
-    col = shade(ro, rd);
+    col = shadeRefl(ro, rd);
     col = pow(col, vec3(1.0 / 2.2));
     fragColor = vec4(col, 1.0);
 }

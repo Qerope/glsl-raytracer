@@ -82,8 +82,9 @@ vec3 shade(vec3 ro, vec3 rd)
 {
     vec3 sky = vec3(0.45, 0.6, 0.8);
     float t = march(ro, rd);
+    vec3 fogCol = vec3(0.65, 0.72, 0.85);
     if (t > MAX_DIST)
-        return sky;
+        return fogCol;
 
     vec3 p = ro + rd * t;
     vec3 n = calcNormal(p);
@@ -95,6 +96,8 @@ vec3 shade(vec3 ro, vec3 rd)
     if (p.y < EPS * 2.0)
         albedo = floorColor(p);
     vec3 col = albedo * (0.15 * ao + 0.85 * diff);
+
+    col = mix(col, fogCol, 1.0 - exp(-0.0025 * t * t));
     return col;
 }
 

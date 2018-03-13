@@ -21,6 +21,7 @@ float smin(float a, float b, float k)
 
 float map(vec3 p)
 {
+    p.xz = mod(p.xz + 3.0, 6.0) - 3.0;
     float d = sdSphere(p - vec3(0.0, 1.0, 0.0), 1.0);
     d = smin(d, sdBox(p - vec3(1.1, 0.5, 0.0), vec3(0.5)), 0.3);
     return min(d, p.y);

@@ -130,9 +130,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
             vec2 o = vec2(float(m), float(n)) / float(AA) - 0.5;
             vec2 uv = (2.0 * (fragCoord + o) - iResolution.xy) / iResolution.y;
             vec3 rd = normalize(uv.x * uu + uv.y * vv + 1.5 * ww);
-            col += pow(shadeRefl(ro, rd), vec3(1.0 / 2.2));
+            col += shadeRefl(ro, rd);
         }
     }
     col /= float(AA * AA);
+    col = pow(col, vec3(1.0 / 2.2));
     fragColor = vec4(col, 1.0);
 }
